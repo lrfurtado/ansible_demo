@@ -1,0 +1,52 @@
+// Simple NodeJS application
+
+var http = require('http');
+var Memcached = require('memcached');
+
+var memcached = new Memcached('127.0.0.1:11211');
+
+var mysql=require('mysql');
+var connection=mysql.createConnection({
+
+host:'localhost',
+ user:'root',
+ password:'',
+ database:'test'
+
+});
+
+connection.connect(function(err) {
+  if (err) throw err;
+  console.log("Connected!");
+});
+
+
+
+var server = http.createServer(function (request, response) {
+    response.writeHead(200, {"Content-Type": "text/plain"});
+    memcached.get('car_model', function (err, data) {
+       if (typeof data !== 'undefined' && data) {
+           response.end("Hello From Memcache\n");
+       } else {
+           sql = "SELECT '2017 Tesla Model 3' as model";
+           connection.query(sql, function (err, result) {
+              if (err) throw err;
+              response.end("Hello from MySQL\n");
+           });
+           memcached.set('car_model', 'tesla model 3', 10, function (err) { /* stuff */ });
+       }
+    });
+});
+
+var argv = require('yargs')
+    .usage('Usage: $0 -p [num]')
+    .default('p', 8080)
+    .alias('p', 'port')
+    .argv;
+
+
+var port = argv.p;
+var host = "127.0.0.1";
+
+server.listen(port, host);
+console.log("Server running at http://"+ host + ":" + port);

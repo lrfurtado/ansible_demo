@@ -1,0 +1,5 @@
+---
+- hosts: all
+  become: yes
+  roles:
+  - { role: challenge, app_port: 8282 }

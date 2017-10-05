@@ -1,0 +1,6 @@
+---
+- name: Install memcached package 
+  package: name=memcached state=installed
+
+- name: Make sure memcached is running and starts at boot
+  service: name=memcached state=started enabled=yes

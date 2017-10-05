@@ -1,0 +1,16 @@
+---
+# tasks file for challenge
+- name: update motd
+  lineinfile: 
+    line: 'Provisioned by ansible!'
+    dest: /etc/motd
+    create: yes
+    state: present
+
+- include: epel.yml 
+- include: nginx.yml 
+- include: memcached.yml 
+- include: mysqld.yml 
+- include: nodejs.yml 
+- include: firewall.yml 
+- include: deploy-app.yml 

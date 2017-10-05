@@ -1,0 +1,6 @@
+---
+- name: Install mysql package 
+  package: name=mariadb-server state=installed
+
+- name: Make sure mysqld is running and starts at boot
+  service: name=mariadb state=started enabled=yes

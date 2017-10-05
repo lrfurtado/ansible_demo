@@ -1,0 +1,41 @@
+---
+- name: iptables Allow related and established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+  become: yes
+
+- name: iptables Allow ssh connections
+  iptables:
+    chain: INPUT
+    destination_port: 22
+    protocol: tcp
+    match: tcp
+    jump: ACCEPT
+  become: yes
+
+- name: iptables Allow local traffic
+  iptables:
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT
+  become: yes
+ 
+
+- name: iptables Allow access to the proxy
+  iptables:
+    chain: INPUT
+    source:  10.0.0.0/8 
+    protocol: tcp
+    match: tcp
+    destination_port: 80
+    jump: ACCEPT
+  become: yes
+
+  
+- name: iptables drop all conections by default 
+  iptables:
+    chain: INPUT
+    jump: REJECT
+  become: yes

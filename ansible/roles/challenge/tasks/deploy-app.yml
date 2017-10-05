@@ -1,0 +1,61 @@
+---
+- name: Create challenge user 
+  user:
+    name: challenge
+    comment: "Challenge app"
+
+- name: Create deployment directory for challenge app
+  file: state=directory mode=755 path=/opt/app owner=challenge group=challenge
+
+- name: Copy challenge app systemd service file 
+  template:
+    src: "challenge-app.service.j2"
+    dest: "/etc/systemd/system/challenge-app.service"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart challenge-app
+
+
+- name: Copy challenge app src code to deployment location
+  template:
+    src: "app.js.j2"
+    dest: "/opt/app/app.js"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - restart challenge-app
+
+- name: Copy package.json to deployment location
+  template:
+    src: "package.json.j2"
+    dest: "/opt/app/package.json"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - Install packages based on package.json
+
+
+- name: Install packages based on package.json
+  npm:
+    path: /opt/app
+  notify:
+    - restart challenge-app
+
+- name: Make sure nginx starts at boot
+  service: name=nginx state=started enabled=yes
+
+- name: Install libsemanage-python which is required by ansible so we can manage selinux booleans
+  package: name=libsemanage-python state=installed 
+
+- name: Make selinux allow nginx to connect to backend machine
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+
+- name: Make sure challenge app starts at boot
+  systemd: name=challenge-app state=started enabled=yes daemon_reload=yes
